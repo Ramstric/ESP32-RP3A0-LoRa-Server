@@ -1,0 +1,34 @@
+---
+import "../styles/global.css";
+
+const { id, text, active} = Astro.props;
+---
+
+<button id={id} class={active ? 'active' : ''}>{text}</button>
+
+<!-- ------ Local style ------ -->
+
+<style>
+    button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 10px;
+        background-color: transparent;
+        
+        color: var(--gray);
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    button:hover {color: var(--white);}
+    
+    button.active {
+        color: var(--black);
+        background-color: var(--white);
+    }
+    
+    button.active:hover {
+        color: var(--white);
+        background-color: var(--gray);
+    }
+</style>

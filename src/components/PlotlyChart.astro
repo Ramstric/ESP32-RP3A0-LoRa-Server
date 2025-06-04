@@ -1,0 +1,124 @@
+---
+// PlotlyChart.astro
+export interface Props {
+	chartId: string;
+	title?: string;
+	xAxisTitle?: string;
+	yAxisTitle?: string;
+	lineColor?: string;
+	initialData?: {
+		x: (string | number | Date)[];
+		y: number[];
+	};
+}
+
+const {
+	chartId,
+	title = '',
+	xAxisTitle = '<b>Tiempo</b>',
+	yAxisTitle = 'Valor',
+	lineColor = '#ffece7',
+	initialData = { x: [], y: [] }
+} = Astro.props;
+
+const uniqueId = chartId;
+---
+
+<div id={uniqueId} class="plotly-chart"></div>
+
+
+<style>
+	.plotly-chart {
+		width: 100%;
+        height: 100%;
+	}
+</style>
+
+<script define:vars={{ uniqueId, title, xAxisTitle, yAxisTitle, lineColor, initialData }} >
+	// Wait for DOM and Plotly to be ready
+	document.addEventListener('DOMContentLoaded', function() {
+		// Dynamically import Plotly
+		import('/public/js/plotly.min.js').then(() => {
+			const chartContainer = document.getElementById(uniqueId);
+			
+			if (!chartContainer) return;
+
+			const layout = {
+				title: title ? {
+					text: title,
+					font: { color: '#ffece7', size: 16, family: 'Manrope' }
+				} : undefined,
+				xaxis: {
+					title: xAxisTitle,
+					color: '#ffece7',
+					gridcolor: '#444',
+					tickfont: { color: '#ffece7', family: 'Manrope' }
+				},
+				yaxis: {
+					title: yAxisTitle,
+					color: '#ffece7',
+					gridcolor: '#444',
+					tickfont: { color: '#ffece7', family: 'Manrope' }
+				},
+				plot_bgcolor: 'rgba(0,0,0,0)',
+				paper_bgcolor: 'rgba(0,0,0,0)',
+				font: { color: '#ffece7', family: 'Manrope' },
+				margin: { l: 75, r: 30, t: title ? 50 : 20, b: 70, pad: 10 },
+			};
+
+			const config = { 
+				displayModeBar: false 
+			};
+
+			const data = [{
+				x: initialData.x,
+				y: initialData.y,
+				type: 'scatter',
+				mode: 'lines+markers',
+				name: yAxisTitle,
+				line: { color: lineColor, width: 1.5 },
+				marker: { color: lineColor, size: 5 }
+			}];
+
+			Plotly.newPlot(chartContainer, data, layout, config);
+
+			// Create global update functions for this specific chart
+			window[`update_${uniqueId.replaceAll('-', '_')}`] = function(value, time) {
+				const update = {
+					x: [[time]],
+					y: [[value]]
+				};
+				
+				Plotly.extendTraces(chartContainer, update, [0]);
+				
+				// Keep only last 50 points to prevent memory issues
+				if (chartContainer.data[0].x.length > 2) {
+					Plotly.relayout(chartContainer, {
+						'xaxis.range': [
+							chartContainer.data[0].x[chartContainer.data[0].x.length - 3],
+							chartContainer.data[0].x[chartContainer.data[0].x.length - 1]
+						]
+					});
+				}
+			};
+			// Create batch update function
+			window[`updateBatch_${uniqueId.replaceAll('-', '_')}`] = function(valueArray, timeArray) {
+				const update = {
+					x: [timeArray],
+					y: [valueArray]
+				};
+				
+				Plotly.restyle(chartContainer, update, [0]);
+			};
+			console.log('Update function created for:', `updateBatch_${uniqueId.replaceAll('-', '_')}`);
+
+			// Create function to get current data
+			window[`getData_${uniqueId.replaceAll('-', '_')}`] = function() {
+				return {
+					x: chartContainer.data[0].x.at(-1),
+					y: chartContainer.data[0].y.at(-1)
+				};
+			};
+		});
+	});
+</script>

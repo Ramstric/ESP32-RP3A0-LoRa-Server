@@ -1,0 +1,229 @@
+---
+import "../styles/global.css";
+
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/Button.astro";
+---
+
+<Layout>
+    <div class="sort">
+        <p>ordenar por:</p>
+        <div class="options">
+            <Button text="fecha" id="sort-date" active />
+            <Button text="hora" id="sort-time" />
+            <Button text="temperatura" id="sort-temperature" />
+        </div>
+    </div>
+
+    <div class="filter">
+        <p>filtrar nodos:</p>
+        <div class="options">
+            <Button text="1" id="filter-node-1" active />
+            <Button text="2" id="filter-node-2" active />
+        </div>
+    </div>
+
+    <div class="database">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-fecha">Fecha</th>
+                    <th class="col-hora">Hora</th>
+                    <th class="col-temperatura">Temperatura</th>
+                    <th class="col-r">R</th>
+                    <th class="col-g">G</th>
+                    <th class="col-b">B</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</Layout>
+
+<style>
+    .sort, .filter {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+        flex-direction: row;
+        justify-content: flex-start;
+
+        gap: 75px;
+
+        padding: 5px 100px;
+
+        color: var(--white);
+        background-color: var(--black);
+    }
+
+	.filter {box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);}
+
+    .sort p, .filter p {width: fit-content;}
+
+    .options {
+        flex-direction: row;
+
+        width: fit-content;
+
+        gap: 125px;
+    }
+
+    .database {padding: 10px 100px;}
+
+    .data-table {
+		table-layout: fixed;
+
+        width: 100%;
+
+        border-collapse: collapse;
+		color: var(--black);
+        background-color: var(--white);
+    }
+
+    .data-table th {
+        padding: 12px 5px;
+
+		font-weight: 600;
+    }
+
+    .data-table td {
+        padding: 5px 5px;
+
+        text-align: center;
+    }
+
+    .col-id {width: 20% !important;}
+    .col-fecha {width: 20% !important;}
+    .col-hora {width: 20% !important;}
+    .col-temperatura {width: 20% !important;}
+
+    .col-r, .col-g, .col-b { width: 3% !important; }
+</style>
+
+<script>
+	const temperatureColorScale = ["#37537C","#26436F","#254f77","#2b5b79","#27678a","#287593","#438190","#648c89","#879a84","#aaa97d","#c2ab77","#c19d61","#c38a53","#be704c","#af4d4c","#9f294c","#87203e","#6e1531","#560c25","#3d0216"];
+
+	let currentSort = 'fecha';
+	let currentOrder = 'DESC';
+	let currentNodes = '1,2';
+	let fetchInterval;
+
+	function updateTable(data: [{id: number, fecha: string, hora: string, temperatura: number, r: number, g: number, b: number}]) {
+		const tbody = document.querySelector('.data-table tbody');
+		if (!tbody) return;
+		
+		tbody.innerHTML = '';
+		
+		data.forEach(row => {
+			const tr = document.createElement('tr');
+			tr.style.textAlign = 'center';
+			
+			const rgbValue = `rgb(${row.r}, ${row.g}, ${row.b})`;
+			const temperatureColor = temperatureColorScale[Math.floor(Math.abs(row.temperatura/2.5 - 1))]
+
+			tr.innerHTML = `
+				<td>${row.id}</td>
+				<td>${row.fecha}</td>
+				<td>${row.hora}</td>
+				<td style="background-color: ${temperatureColor}">${row.temperatura}</td>
+				<td style="background-color: ${rgbValue}">${row.r}</td>
+				<td style="background-color: ${rgbValue}">${row.g}</td>
+				<td style="background-color: ${rgbValue}">${row.b}</td>
+			`;
+			tbody.appendChild(tr);
+		});
+	}
+
+	async function fetchDatabaseData() {
+		try {
+			const params = new URLSearchParams({sort: currentSort, order: currentOrder, nodes: currentNodes, limit: '100'});
+			
+			const response = await fetch(`/api/retrieveDatabase?${params}`);
+			const result = await response.json();
+
+			if (result.success) {
+				updateTable(result.data);
+			} else {
+				console.error('API Error:', result.error);
+			}
+		} catch (error) {
+			console.error('Fetch error:', error);
+		}
+	}
+
+	function updateActiveButton(activeId: string) {
+		document.querySelectorAll(`[id^="sort-"]`).forEach(btn => {
+			btn.classList.remove('active');
+		});
+
+		document.getElementById(activeId)?.classList.add('active');
+	}
+
+	function toggleNodeFilter(nodeId: number, button: EventTarget | null) {
+		if (!button || !(button instanceof HTMLElement)) return;
+		
+		const nodes = currentNodes.split(',').map(n => parseInt(n)).filter((n) => !isNaN(n));
+		const index = nodes.indexOf(nodeId);
+
+		if (index > -1) {
+			nodes.splice(index, 1);
+			button.classList.remove('active');
+		} else {
+			nodes.push(nodeId);
+			button.classList.add('active');
+		}
+		
+		currentNodes = nodes.join(',');
+		fetchDatabaseData();
+	}
+
+	function setupSortButtons() {
+		document.getElementById('sort-date')?.addEventListener('click', () => {
+			currentSort = 'fecha';
+			updateActiveButton('sort-date');
+			fetchDatabaseData();
+		});
+		
+		document.getElementById('sort-time')?.addEventListener('click', () => {
+			currentSort = 'hora';
+			updateActiveButton('sort-time');
+			fetchDatabaseData();
+		});
+		
+		document.getElementById('sort-temperature')?.addEventListener('click', () => {
+			currentSort = 'temperatura';
+			updateActiveButton('sort-temperature');
+			fetchDatabaseData();
+		});
+	}
+
+	function setupFilterButtons() {
+		document.getElementById('filter-node-1')?.addEventListener('click', (e) => {
+			toggleNodeFilter(1, e.target);
+		});
+		
+		document.getElementById('filter-node-2')?.addEventListener('click', (e) => {
+			toggleNodeFilter(2, e.target);
+		});
+	}
+
+	// Initialize when page loads
+	document.addEventListener('DOMContentLoaded', () => {
+		setupSortButtons();
+		setupFilterButtons();
+		
+		// Initial fetch
+		fetchDatabaseData();
+		
+		// Set up interval to fetch every second
+		fetchInterval = setInterval(fetchDatabaseData, 1000);
+	});
+
+	// Clean up interval when page unloads
+	window.addEventListener('beforeunload', () => {
+		if (fetchInterval) {clearInterval(fetchInterval);}
+	});
+
+</script>

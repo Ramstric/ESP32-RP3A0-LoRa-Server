@@ -1,0 +1,64 @@
+* {
+    width: 100%;
+    margin: 0;
+
+    box-sizing: border-box;
+
+    font-family: Manrope, serif;
+    font-weight: 450;
+}
+
+div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+html {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+
+    background-color: var(--background);
+
+    font-optical-sizing: auto;
+}
+
+h1 {
+    font-size: var(--h1-desktop);
+    font-weight: 500;
+}
+
+h2 {
+    font-size: var(--h2-desktop);
+    font-weight: 400;
+}
+
+h3 {
+    font-size: var(--h3-desktop);
+    font-weight: 350;
+}
+
+p, th, td {
+    font-size: var(--p-desktop);
+    font-weight: 350;
+}
+
+a {
+    font-size: var(--p-desktop);
+    font-weight: 350;
+    text-decoration: none;
+}
+
+i {
+    font-weight: bold;
+}
+
+b {
+    font-weight: 600;
+}
+
+button {
+    font-size: var(--p-desktop);
+
+}

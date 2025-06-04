@@ -1,0 +1,116 @@
+---
+import "../styles/global.css";
+
+import Layout from "../layouts/Layout.astro";
+import DeviceComponent from "../components/deviceComponent.astro";
+
+const currDevicesFetch = await fetch(`${Astro.url.origin}/api/currentDevices`, {
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+const currDevicesData = await currDevicesFetch.json();
+const currDevices = currDevicesData.devices;
+---
+
+<Layout id="dashboard">
+    {   
+        currDevices.map((id: number) => (
+            <DeviceComponent deviceId={id} />
+        ))
+    }
+</Layout>
+
+<style>
+    .device-container {
+        justify-content: flex-start;
+        height: 825px;
+
+        gap: 25px;
+        padding: 25px 50px 5px 50px;
+
+        background-color: var(--white);
+    }
+
+    .identifier {
+        flex-direction: row;
+        justify-content: flex-start;
+
+        gap: 10px;
+    }
+
+    #device-logo {
+        width: 50px;
+    }
+
+    .plots {
+        flex-direction: row;
+
+        gap: 100px;
+
+        text-align: center;
+    }
+
+    .temperature,
+    .color {
+        width: fit-content;
+
+        gap: 10px;
+    }
+
+    .plot {
+        width: 610px;
+        height: 450px;
+
+        color: var(--white);
+        background-color: #1d1d1d;
+
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+        padding-top: 10px;
+    }
+
+    .recent-data {
+        flex-direction: row;
+
+        gap: 10px;
+
+        * {
+            width: fit-content;
+        }
+
+        img {
+            width: 30px;
+            height: 30px;
+        }
+    }
+</style>
+
+<script>
+
+    // SSE connection to Astro API route
+    const sourceSSE = new EventSource("/api/deviceMonitoringEvent");
+
+    sourceSSE.onmessage = function(event) {
+      const notificationElement = document.getElementById("refresh-notification") as HTMLDivElement;
+      notificationElement.style.display = "flex";
+    };
+
+
+    window.addEventListener('beforeunload', () => {
+      sourceSSE.close();
+    });
+
+    function showReloadNotification() {
+        // Create a subtle notification
+        const notification = document.createElement("div");
+        notification.innerHTML = `
+    <div style="position: fixed; top: 20px; right: 20px; background: #007acc; color: white; padding: 10px; border-radius: 5px; z-index: 1000;">
+      New devices detected! 
+      <button onclick="location.reload()" style="margin-left: 10px; padding: 5px;">Refresh</button>
+      <button onclick="this.parentElement.remove()" style="margin-left: 5px; padding: 5px;">×</button>
+    </div>
+  `;
+        document.body.appendChild(notification);
+    }
+</script>

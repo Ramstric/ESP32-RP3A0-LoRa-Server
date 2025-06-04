@@ -1,0 +1,49 @@
+@import url("commonElements.css");
+
+/* Font imports */
+@font-face {
+    font-family: "Manrope";
+    font-weight: 200 800;
+    src: url("/fonts/Manrope-VariableFont_wght.ttf")format("truetype");
+}
+
+@font-face {
+    font-family: "FiraCode";
+    font-weight: 300 700;
+    src: url("/fonts/FiraCode-VariableFont_wght.ttf")format("truetype");
+}
+
+:root {
+    /* --------------- Desktop Font Options --------------- */
+    --h1-desktop: 2.15em;
+    --h2-desktop: 1.75em;
+    --h3-desktop: 1.35em;
+
+    --p-desktop: 0.95em;
+
+    --footer-desktop: 10px;
+
+    /* ---------------------- Colors ---------------------- */
+    --black: #0b0b0b;
+    --dark: #101010;
+    --gray: #3c3c3c;
+    --white: #ffece7;
+
+    --red: #eb4964;
+    --crimson: #f92f51;
+    --brown: #8b4e3e;
+    --coral: #e64e4e;
+    --orange: #ff7c65;
+    --yellow: #f5b255;
+    --lime: #b2d235;
+    --green: #49b258;
+    --teal: #51d07f;
+    --cyan: #5ec6cf;
+    --blue: #598ade;
+    --ocean: #4244cb;
+    --purple: #463280;
+
+    --background: var(--white);
+    --primary: var(--white);
+    --secondary: var(--gray);
+}

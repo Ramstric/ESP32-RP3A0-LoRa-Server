@@ -1,0 +1,301 @@
+---
+import PlotlyChart from "./PlotlyChart.astro";
+// deviceComponent.astro
+export interface Props {
+    deviceId: number;
+    deviceType?: string;
+}
+const { deviceId, deviceType = "ESP32" } = Astro.props;
+const uniqueDeviceId = `device-${deviceId}`;
+const temperatureChartId = `temperature-${uniqueDeviceId}`;
+const colorChartId = `color-${uniqueDeviceId}`;
+---
+
+<div class="device-container" id={uniqueDeviceId}>
+    <!-- Connection Animation Overlay -->
+    <div class="connection-overlay" id={`overlay-${uniqueDeviceId}`}>
+        <div class="connection-content">
+            <div class="connection-icon">
+                <img src="/img/motherboard.png" alt="Device" />
+                <div class="pulse-ring"></div>
+            </div>
+            <div class="connection-text">
+                <h2>Conectando dispositivo...</h2>
+                <p><span class="device-type">{deviceType}</span> dispositivo conectado a la red</p>
+                <p>ID del nodo: <span class="device-id">{deviceId}</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Device Content -->
+    <div class="device-main-content" id={`content-${uniqueDeviceId}`}>
+        <div class="identifier">
+            <img src="/img/motherboard.png" id="device-logo" alt="Motherboard" />
+            <h2>Dispositivo <b>{deviceType}</b> - Nodo <b>{deviceId}</b></h2>
+        </div>
+        <div class="plots">
+            <div class="temperature">
+                <h3>Sensor de temperatura</h3>
+                <div class="plot">
+                    <div class="recent-data">
+                        <img src="/img/temperature.png" alt="Temperature Icon" />
+                        <p>Temperatura actual:</p>
+                        <p id="current-temperature">-- °C</p>
+                    </div>
+                    <PlotlyChart
+                        chartId={temperatureChartId}
+                        yAxisTitle="<b>Temperatura (°C)</b>"
+                        lineColor="#ffece7"
+                    />
+                </div>
+            </div>
+            <div class="color">
+                <h3>Módulo de reconocimiento de color</h3>
+                <div class="plot">
+                    <div class="recent-data">
+                        <img src="/img/color-palette.png" alt="Color Palette Icon" />
+                        <p>Color:</p>
+                        <p id="current-color">--</p>
+                    </div>
+                    <PlotlyChart
+                        chartId={colorChartId}
+                        yAxisTitle="<b>Valor RGB</b>"
+                        lineColor="#ffece7"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .device-container {
+        position: relative;
+        justify-content: flex-start;
+        height: 675px;
+        gap: 25px;
+        padding: 25px 50px 5px 50px;
+        background-color: var(--white);
+        overflow: hidden;
+    }
+
+    /* Connection Animation Styles */
+    .connection-overlay {
+        position: absolute;
+        width: 90%;
+        height: 90%;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border-radius: 20px;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+    }
+
+    .connection-overlay.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .connection-content {
+        text-align: center;
+        color: var(--white);
+        animation: slideInUp 0.3s ease-out;
+    }
+
+    .connection-icon {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+    }
+
+    .connection-icon img {
+        width: 80px;
+        height: 80px;
+        filter: brightness(1.2);
+        animation: devicePulse 1s infinite;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        border: 2px solid #ffece7;
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulseRing 1s infinite;
+    }
+
+    .connection-text h2 {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #ffece7;
+        font-weight: 600;
+    }
+
+    .connection-text p {
+        font-size: 18px;
+        margin: 8px 0;
+        color: #cccccc;
+    }
+
+    .device-type {
+        color: #ffece7;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .device-id {
+        color: #ffece7;
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+
+    /* Main Content Styles */
+    .device-main-content {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease-out;
+    }
+
+    .device-main-content.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .identifier {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    #device-logo {
+        width: 50px;
+    }
+
+    .plots {
+        flex-direction: row;
+        gap: 100px;
+        text-align: center;
+    }
+
+    .temperature,
+    .color {
+        width: fit-content;
+        gap: 10px;
+    }
+
+    .plot {
+        width: 610px;
+        height: 450px;
+        color: var(--white);
+        background-color: #1d1d1d;
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+        padding-top: 10px;
+    }
+
+    .recent-data {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .recent-data * {
+        width: fit-content;
+    }
+
+    .recent-data img {
+        width: 30px;
+        height: 30px;
+    }
+
+    /* Animations */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes devicePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes pulseRing {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+        50% {
+            opacity: 0.6;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+    }
+
+</style>
+
+<script define:vars={{ temperatureChartId, colorChartId, uniqueDeviceId }}>
+    const currentTemperatureElement = document.getElementById('current-temperature');
+    const currentColorElement = document.getElementById('current-color');
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        // Connection animation sequence
+        const overlay = document.getElementById(`overlay-${uniqueDeviceId}`);
+        const mainContent = document.getElementById(`content-${uniqueDeviceId}`);
+        
+        // Start the connection sequence
+        setTimeout(() => {
+            // Fade out overlay and show main content
+            overlay.classList.add('fade-out');
+            mainContent.classList.add('show');
+            
+            // Remove overlay from DOM after transition
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 500);
+        }, 2000); // Show connection animation for 2 seconds
+
+        // Data update intervals (start after connection animation)
+        setTimeout(() => {
+            const tempInterval = setInterval(() => {
+                try {
+                    if (window[`getData_${temperatureChartId.replaceAll('-', '_')}`]) {
+                        const data = window[`getData_${temperatureChartId.replaceAll('-', '_')}`]();
+                        currentTemperatureElement.textContent = `${data.y || 0} °C`;
+                    }
+                } catch (error) {
+                    console.error('Error updating temperature:', error);
+                }
+            }, 3000);
+
+            const colorInterval = setInterval(() => {
+                try {
+                    if (window[`getData_${colorChartId.replaceAll('-', '_')}`]) {
+                        const data = window[`getData_${colorChartId.replaceAll('-', '_')}`]();
+                        // You'll need to decide how to display RGB data
+                        currentColorElement.textContent = `RGB: ${data.y || 0}`;
+                    }
+                } catch (error) {
+                    console.error('Error updating color:', error);
+                }
+            }, 3000);
+        }, 2000); // Start data updates after connection animation completes
+    });
+</script>
