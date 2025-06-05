@@ -249,6 +249,31 @@ const colorChartId = `color-${uniqueDeviceId}`;
         }
     }
 
+    /* Responsive Styles */
+    @media (max-width: 1360px) {
+        
+        .device-container {
+            height: fit-content;
+            padding: 15px 25px 25px 25px;
+        }
+
+        .plots {
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .plot {
+            width: 100%;
+            height: 300px;
+        }
+
+        .color, .temperature {
+            width: 100%;
+        }
+
+        
+    }
+
 </style>
 
 <script define:vars={{ temperatureChartId, colorChartId, uniqueDeviceId }}>

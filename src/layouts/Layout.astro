@@ -19,6 +19,9 @@ const currentPath = Astro.url.pathname;
                 <img id="github-logo" src="/img/github.png" alt="GitHub Logo" />
                 <p>github.com/Ramstric</p>
             </div>
+            <div class="github-title-mobile" onclick="window.open('https://github.com/Ramstric', '_blank')">
+                <img id="github-logo" src="/img/github.png" alt="GitHub Logo" />
+            </div>
             <a href="/" class={currentPath === '/' ? 'active' : ''}>dashboard</a>
             <a href="/database" class={currentPath === '/database' ? 'active' : ''}>database</a>
         </nav>
@@ -69,6 +72,17 @@ const currentPath = Astro.url.pathname;
         gap: 15px;
         border-radius: 25px;
 
+        color: var(--black);
+        background-color: var(--primary);
+
+        transition: all 0.2s ease-in-out;
+    }
+
+    .github-title-mobile {
+        display: none;
+
+        padding: 2px 4px;
+        border-radius: 25px;
         color: var(--black);
         background-color: var(--primary);
 
@@ -152,5 +166,22 @@ const currentPath = Astro.url.pathname;
             width: 100%;
             opacity: 1;
         }
+    }
+
+    @media (max-width: 835px) {
+        nav {
+            padding: 12px 25px;
+            justify-content: center;
+            gap: clamp(2.813rem, -1.785rem + 18.391vw, 7.813rem);
+        }
+
+        .github-title {
+            display: none;
+        }
+
+        .github-title-mobile {
+            display: flex;
+        }
+
     }
 </style>
