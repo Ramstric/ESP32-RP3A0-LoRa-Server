@@ -1,24 +1,18 @@
 ---
-// PlotlyChart.astro
+import "../styles/global.css";
+
 export interface Props {
 	chartId: string;
-	title?: string;
-	xAxisTitle?: string;
 	yAxisTitle?: string;
 	lineColor?: string;
-	initialData?: {
-		x: (string | number | Date)[];
-		y: number[];
-	};
+	typeData?: 'temperature' | 'color';
 }
 
 const {
 	chartId,
-	title = '',
-	xAxisTitle = '<b>Tiempo</b>',
 	yAxisTitle = 'Valor',
 	lineColor = '#ffece7',
-	initialData = { x: [], y: [] }
+	typeData = 'temperature',
 } = Astro.props;
 
 const uniqueId = chartId;
@@ -34,89 +28,109 @@ const uniqueId = chartId;
 	}
 </style>
 
-<script define:vars={{ uniqueId, title, xAxisTitle, yAxisTitle, lineColor, initialData }} >
-	// Wait for DOM and Plotly to be ready
+<script define:vars={{ uniqueId, yAxisTitle, lineColor, typeData }} >
 	document.addEventListener('DOMContentLoaded', function() {
-		// Dynamically import Plotly
-		import('/public/js/plotly.min.js').then(() => {
-			const chartContainer = document.getElementById(uniqueId);
-			
-			if (!chartContainer) return;
+		import('/js/plotly.min.js').then(() => {
+			const chartContainer = document.getElementById(uniqueId)			
 
 			const layout = {
-				title: title ? {
-					text: title,
-					font: { color: '#ffece7', size: 16, family: 'Manrope' }
-				} : undefined,
 				xaxis: {
-					title: xAxisTitle,
+					title: '<b>Tiempo</b>',
+					range: [0, 6],
 					color: '#ffece7',
 					gridcolor: '#444',
 					tickfont: { color: '#ffece7', family: 'Manrope' }
 				},
 				yaxis: {
 					title: yAxisTitle,
+					range: [0, typeData === 'temperature' ? 50 : 255],
 					color: '#ffece7',
 					gridcolor: '#444',
 					tickfont: { color: '#ffece7', family: 'Manrope' }
 				},
 				plot_bgcolor: 'rgba(0,0,0,0)',
 				paper_bgcolor: 'rgba(0,0,0,0)',
+				showlegend: false,
 				font: { color: '#ffece7', family: 'Manrope' },
-				margin: { l: 75, r: 30, t: title ? 50 : 20, b: 70, pad: 10 },
+				margin: { l: 65, r: 35, t: title ? 50 : 20, b: 65, pad: 10 },
 			};
 
-			const config = { 
-				displayModeBar: false 
-			};
+			const config = {displayModeBar: false};
 
-			const data = [{
-				x: initialData.x,
-				y: initialData.y,
-				type: 'scatter',
+			const temperatureTraces = [{
+				x: [],
+				y: [],
 				mode: 'lines+markers',
-				name: yAxisTitle,
-				line: { color: lineColor, width: 1.5 },
-				marker: { color: lineColor, size: 5 }
+				line: {color: lineColor, width: 1.5},
+				marker: {color: lineColor, size: 5}
 			}];
 
-			Plotly.newPlot(chartContainer, data, layout, config);
+			const colorTraces = [{
+                x: [],
+                y: [],
+                mode: 'lines+markers',
+                line: {color: getComputedStyle(document.documentElement).getPropertyValue('--red'), width: 1.5},
+                marker: {color: getComputedStyle(document.documentElement).getPropertyValue('--red'), size: 5}
+            },{
+                x: [],
+                y: [],
+                mode: 'lines+markers',
+                line: {color: getComputedStyle(document.documentElement).getPropertyValue('--lime'), width: 1.5},
+                marker: {color: getComputedStyle(document.documentElement).getPropertyValue('--lime'), size: 5}
+            },{
+                x: [],
+                y: [],
+                mode: 'lines+markers',
+                line: {color: getComputedStyle(document.documentElement).getPropertyValue('--blue'), width: 1.5},
+                marker: {color: getComputedStyle(document.documentElement).getPropertyValue('--blue'), size: 5}
+            }];
 
-			// Create global update functions for this specific chart
-			window[`update_${uniqueId.replaceAll('-', '_')}`] = function(value, time) {
-				const update = {
-					x: [[time]],
-					y: [[value]]
-				};
-				
-				Plotly.extendTraces(chartContainer, update, [0]);
-				
-				// Keep only last 50 points to prevent memory issues
-				if (chartContainer.data[0].x.length > 2) {
-					Plotly.relayout(chartContainer, {
-						'xaxis.range': [
-							chartContainer.data[0].x[chartContainer.data[0].x.length - 3],
-							chartContainer.data[0].x[chartContainer.data[0].x.length - 1]
-						]
-					});
+			Plotly.newPlot(chartContainer, typeData === 'temperature' ? temperatureTraces : colorTraces, layout, config);
+
+			setInterval(async () => {
+				try {
+					const paramsQuery = new URLSearchParams({sort: 'hora', order: 'DESC', nodes: uniqueId.split('-')[1], limit: '7'});
+					const response = await fetch(`/api/retrieveDatabase?${paramsQuery}`);
+
+					if (!response.ok) throw new Error('Database response for PlotlyChart was not ok');
+
+					const responseDB = await response.json();
+										
+					const timeArray = responseDB.data.toReversed().map((row) => row.hora)
+
+					if (typeData === 'temperature') {
+						const updateData = {
+                            x: [timeArray],
+                            y: [responseDB.data.toReversed().map((row) => row.temperatura)]
+                        }
+
+						Plotly.restyle(chartContainer, updateData, [0]);
+					} else {
+						const updateData = {
+							x: [timeArray, timeArray, timeArray],
+							y: [responseDB.data.toReversed().map((row) => row.r),
+								responseDB.data.toReversed().map((row) => row.g),
+								responseDB.data.toReversed().map((row) => row.b)]
+						}
+
+						Plotly.restyle(chartContainer, updateData, [0, 1, 2]);
+					}
+
+					return;
+				} catch (error) {
+					console.error('Error fetching data:', error);
 				}
-			};
-			// Create batch update function
-			window[`updateBatch_${uniqueId.replaceAll('-', '_')}`] = function(valueArray, timeArray) {
-				const update = {
-					x: [timeArray],
-					y: [valueArray]
-				};
-				
-				Plotly.restyle(chartContainer, update, [0]);
-			};
-			console.log('Update function created for:', `updateBatch_${uniqueId.replaceAll('-', '_')}`);
+			}, 2000);
 
-			// Create function to get current data
 			window[`getData_${uniqueId.replaceAll('-', '_')}`] = function() {
-				return {
+				return typeData === 'temperature' ? {
 					x: chartContainer.data[0].x.at(-1),
 					y: chartContainer.data[0].y.at(-1)
+				} : {
+					x: chartContainer.data[0].x.at(-1),
+					y: {r: chartContainer.data[0].y.at(-1),
+						g: chartContainer.data[1].y.at(-1),
+						b: chartContainer.data[2].y.at(-1)}
 				};
 			};
 		});

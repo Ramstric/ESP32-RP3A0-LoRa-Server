@@ -1,12 +1,13 @@
 import mysql from "mysql2/promise";
 
-// Database configuration
+import { DATABASE_NAME, TABLE_NAME } from "astro:env/client";
+
 const dbConfig = {
-    host: "localhost", // Change if your MySQL server is on a different host
+    host: "localhost",
     user: "root",
     password: "root",
-    database: "servidorlora",
-    port: 3306 // Default MySQL port
+    database: DATABASE_NAME,
+    port: 3306
 };
 
 export async function GET({ url }) {
@@ -33,7 +34,7 @@ export async function GET({ url }) {
             rojo as r,
             verde as g,
             azul as b
-        FROM registroLoRa
+        FROM ${TABLE_NAME}
         `;
 
         // Add node filtering if specified
@@ -80,7 +81,7 @@ export async function GET({ url }) {
             }), {status: 500, headers: {"Content-Type": "application/json"}}
         );
     } finally {
-        if (connection) {await connection.end()}         // Always close the connection
+        if (connection) {await connection.end()}
 
     }
 }

@@ -5,9 +5,7 @@ import Layout from "../layouts/Layout.astro";
 import DeviceComponent from "../components/deviceComponent.astro";
 
 const currDevicesFetch = await fetch(`${Astro.url.origin}/api/currentDevices`, {
-    headers: {
-        "Content-Type": "application/json",
-    },
+    headers: {"Content-Type": "application/json"},
 });
 
 const currDevicesData = await currDevicesFetch.json();
@@ -16,9 +14,7 @@ const currDevices = currDevicesData.devices;
 
 <Layout id="dashboard">
     {   
-        currDevices.map((id: number) => (
-            <DeviceComponent deviceId={id} />
-        ))
+        currDevices.map((id: number) => ( <DeviceComponent deviceId={id}/> ))
     }
 </Layout>
 
@@ -87,8 +83,6 @@ const currDevices = currDevicesData.devices;
 </style>
 
 <script>
-
-    // SSE connection to Astro API route
     const sourceSSE = new EventSource("/api/deviceMonitoringEvent");
 
     sourceSSE.onmessage = function(event) {
@@ -96,21 +90,7 @@ const currDevices = currDevicesData.devices;
       notificationElement.style.display = "flex";
     };
 
-
     window.addEventListener('beforeunload', () => {
       sourceSSE.close();
     });
-
-    function showReloadNotification() {
-        // Create a subtle notification
-        const notification = document.createElement("div");
-        notification.innerHTML = `
-    <div style="position: fixed; top: 20px; right: 20px; background: #007acc; color: white; padding: 10px; border-radius: 5px; z-index: 1000;">
-      New devices detected! 
-      <button onclick="location.reload()" style="margin-left: 10px; padding: 5px;">Refresh</button>
-      <button onclick="this.parentElement.remove()" style="margin-left: 5px; padding: 5px;">×</button>
-    </div>
-  `;
-        document.body.appendChild(notification);
-    }
 </script>

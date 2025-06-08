@@ -1,6 +1,6 @@
 ---
-import PlotlyChart from "./PlotlyChart.astro";
-// deviceComponent.astro
+import PlotlyChart from './plotlyChart.astro';
+
 export interface Props {
     deviceId: number;
     deviceType?: string;
@@ -12,7 +12,6 @@ const colorChartId = `color-${uniqueDeviceId}`;
 ---
 
 <div class="device-container" id={uniqueDeviceId}>
-    <!-- Connection Animation Overlay -->
     <div class="connection-overlay" id={`overlay-${uniqueDeviceId}`}>
         <div class="connection-content">
             <div class="connection-icon">
@@ -27,7 +26,6 @@ const colorChartId = `color-${uniqueDeviceId}`;
         </div>
     </div>
 
-    <!-- Main Device Content -->
     <div class="device-main-content" id={`content-${uniqueDeviceId}`}>
         <div class="identifier">
             <img src="/img/motherboard.png" id="device-logo" alt="Motherboard" />
@@ -46,6 +44,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
                         chartId={temperatureChartId}
                         yAxisTitle="<b>Temperatura (°C)</b>"
                         lineColor="#ffece7"
+                        typeData="temperature"
                     />
                 </div>
             </div>
@@ -61,6 +60,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
                         chartId={colorChartId}
                         yAxisTitle="<b>Valor RGB</b>"
                         lineColor="#ffece7"
+                        typeData="color"
                     />
                 </div>
             </div>
@@ -308,19 +308,19 @@ const colorChartId = `color-${uniqueDeviceId}`;
                 } catch (error) {
                     console.error('Error updating temperature:', error);
                 }
-            }, 3000);
+            }, 1000);
 
             const colorInterval = setInterval(() => {
                 try {
                     if (window[`getData_${colorChartId.replaceAll('-', '_')}`]) {
                         const data = window[`getData_${colorChartId.replaceAll('-', '_')}`]();
                         // You'll need to decide how to display RGB data
-                        currentColorElement.textContent = `RGB: ${data.y || 0}`;
+                        currentColorElement.textContent = `RGB: ${data.y.r || 0} ${data.y.g || 0} ${data.y.b || 0}`;
                     }
                 } catch (error) {
                     console.error('Error updating color:', error);
                 }
-            }, 3000);
+            }, 1000);
         }, 2000); // Start data updates after connection animation completes
     });
 </script>

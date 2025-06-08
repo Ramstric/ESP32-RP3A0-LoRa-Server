@@ -76,6 +76,7 @@ import Button from "../components/Button.astro";
 		table-layout: fixed;
 
         width: 100%;
+		min-width: 900px;
 
         border-collapse: collapse;
 		color: var(--black);
@@ -94,23 +95,25 @@ import Button from "../components/Button.astro";
         text-align: center;
     }
 
-    .col-id {width: 20% !important;}
+    .col-id {width: 16% !important;}
     .col-fecha {width: 20% !important;}
     .col-hora {width: 20% !important;}
     .col-temperatura {width: 20% !important;}
 
-    .col-r, .col-g, .col-b { width: 3% !important; }
+    .col-r, .col-g, .col-b { width: 8% !important; }
 
 	@media (max-width: 1150px) {
 		.database{
 			padding: 10px 15px;
+			overflow-x: scroll;
+			width: 100%;
 		}
 
-		table {
-			display: block;
-			overflow-x: auto;
+		.data-table {
+			margin: auto !important;
 			white-space: nowrap;
 		}
+
 	}
 	
 	@media (max-width: 830px) {
@@ -131,7 +134,6 @@ import Button from "../components/Button.astro";
 	let currentSort = 'fecha';
 	let currentOrder = 'DESC';
 	let currentNodes = '1,2';
-	let fetchInterval;
 
 	function updateTable(data: [{id: number, fecha: string, hora: string, temperatura: number, r: number, g: number, b: number}]) {
 		const tbody = document.querySelector('.data-table tbody');
@@ -155,6 +157,7 @@ import Button from "../components/Button.astro";
 				<td style="background-color: ${rgbValue}">${row.g}</td>
 				<td style="background-color: ${rgbValue}">${row.b}</td>
 			`;
+			
 			tbody.appendChild(tr);
 		});
 	}
@@ -241,12 +244,12 @@ import Button from "../components/Button.astro";
 		fetchDatabaseData();
 		
 		// Set up interval to fetch every second
-		fetchInterval = setInterval(fetchDatabaseData, 1000);
-	});
+		const fetchInterval = setInterval(fetchDatabaseData, 1000);
 
-	// Clean up interval when page unloads
-	window.addEventListener('beforeunload', () => {
-		if (fetchInterval) {clearInterval(fetchInterval);}
+		window.addEventListener('beforeunload', () => {
+			if (fetchInterval) { clearInterval(fetchInterval); }
+		});
+
 	});
 
 </script>
