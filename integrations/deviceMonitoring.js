@@ -2,7 +2,7 @@ import fs from "fs";
 import mysql from "mysql2/promise";
 
 import { eventBus } from "../src/lib/eventBus.js";
-//import { rfm69 } from "../src/lib/rfm69radio/rfm69.js";
+import { rfm69 } from "../src/lib/rfm69radio/rfm69.js";
 
 const DATABASE_NAME = "";
 const TABLE_NAME = "";
@@ -18,21 +18,17 @@ async function insertTestData(id_dispositivo, temperatura, rojo, verde, azul) {
     let connection;
     
     try {
-        // Create connection
         connection = await mysql.createConnection(dbConfig);
     
-        // Get current date and time
         const now = new Date();
-        const fecha = now.toISOString().split('T')[0]; // YYYY-MM-DD format
-        const hora = now.toTimeString().split(' ')[0]; // HH:MM:SS format
+        const fecha = now.toISOString().split('T')[0];
+        const hora = now.toTimeString().split(' ')[0];
         
-        // SQL query
         const query = `
         INSERT INTO ${TABLE_NAME} (id_dispositivo, fecha, hora, temperatura, rojo, verde, azul) 
         VALUES (${id_dispositivo}, '${fecha}', '${hora}', ${temperatura}, ${rojo}, ${verde}, ${azul})
         `;
         
-        // Execute the query
         const [result] = await connection.execute(query);
         
         return result;
@@ -46,7 +42,7 @@ async function insertTestData(id_dispositivo, temperatura, rojo, verde, azul) {
     }
 }
 
-//const RFM69 = new rfm69();
+const RFM69 = new rfm69();
 
 const currentDevices = new Set();
 
@@ -56,7 +52,6 @@ export default function backgroundScript() {
     return {
         name: "background-script",
         hooks: {"astro:server:start": async () => {
-            /*
             function packetLog(packet) {
                 const [temperatureValue, ...rgbValues] = packet.payload.split(/[/,]/);
                 
@@ -90,7 +85,6 @@ export default function backgroundScript() {
                 RFM69.registerPacketReceivedCallback(packetLog);
                 return true;
             });
-            */
         }
     }
 };}
