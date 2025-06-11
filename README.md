@@ -2,7 +2,7 @@
 
 This repository contains a Long Range (LoRa) local server implementation using a Raspberry Pi Zero 2 W and ESP32 microcontrollers.
 
-The whole project consists of an Astro project which handles everything through the Sever-Side Rendering implementation. This helps to enable API endpoints and monitoring of the GPIO board.
+The whole project consists of an Astro project, which handles everything through the Sever-Side Rendering implementation. This helps to enable API endpoints and monitoring of the GPIO board.
 
 ## Table of contents
 
@@ -64,7 +64,7 @@ You can review the script `/client_ESP32/RFM69HCW_Tx.cpp` for an example of how 
 - [plotly v3.0.1](https://www.npmjs.com/package/plotly)
 - [spi-device v3.1.2](https://www.npmjs.com/package/spi-device)
 
-Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used but it had to be modified, you can find the modified source files inside `/src/lib/rfm69radio`. As such, the modifications are:
+Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used, but it had to be modified; you can find the modified source files inside `/src/lib/rfm69radio`. As such, the modifications are:
 
 #### Modifications of `registers.js`
 
@@ -142,7 +142,7 @@ You can use the sample code `/client_ESP32/RFM69HCW_Tx.cpp` to set up the ESP32 
 
 ### 1. Install MariaDB
 
-First make sure to install MariaDB and set your **username** and **password**. **Please make sure to take note of the credentials!**
+First, make sure to install MariaDB and set your **username** and **password**. **Please make sure to take note of the credentials!**
 
 ```sh
 sudo apt install mariadb-server
@@ -156,7 +156,7 @@ Use your credentials to access MariaDB
 ```sha
 sudo mariadb -h localhost -u $USERNAME_HERE -p
 ```
-Grant access to your user through password or make a new user for read access, in this example we opt for the first option
+Grant access to your user through password or make a new user for read access, in this example, we opt for the first option
 
 ```sql
 ALTER USER $YOUR_USERNAME@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD($YOUR_PASSWORD);
@@ -203,7 +203,7 @@ npm install
 
 ### 5. Configure credentials
 
-Lastly, add the MariaDB credentials to enviroment variables and also inside the background monitoring script (it has to be done manually because enviroment variable wouldn't work)
+Lastly, add the MariaDB credentials to environment variables and also inside the background monitoring script (it has to be done manually because environment variables wouldn't work)
 
 Your `.env` should look like:
 
@@ -215,7 +215,7 @@ DATABASE_NAME=
 TABLE_NAME=
 ```
 
-Where you have to add your credentials and both the database and table names. If needed you can also change the hostname.
+Add your credentials and both the database and table names. If needed, you can also change the hostname.
 
 Inside `/integrations/deviceMonitoring.js` modify line 7 to line 15:
 
