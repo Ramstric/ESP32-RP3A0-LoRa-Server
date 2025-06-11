@@ -48,12 +48,10 @@ const currentDevices = new Set();
 
 let RFM69;
 
-if (Gpio.accessible) {
+if (fs.existsSync("/sys/class/gpio")) {
     //import { rfm69 } from "../src/lib/rfm69radio/rfm69.js";
-    import("../src/lib/rfm69radio/rfm69.js").then(module => {
-        const rfm69 = module.rfm69;
-        RFM69 = new rfm69();
-    });
+    const rmf69 = await import("../src/lib/rfm69radio/rfm69.js");
+    RFM69 = new rmf69.rfm69();
     
 } else {
     console.warn("RFM69 not available, using mock implementation.");
