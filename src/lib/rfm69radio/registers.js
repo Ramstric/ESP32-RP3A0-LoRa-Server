@@ -1,5 +1,5 @@
 export const reg = Object.freeze({
-  TRANSFER_SPEED: 40000,
+  TRANSFER_SPEED: 500000,
   REG_FIFO: 0x00,
   REG_OPMODE: 0x01,
   REG_DATAMODUL: 0x02,

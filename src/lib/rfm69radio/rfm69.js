@@ -315,7 +315,7 @@ export function rfm69() {
       byteLength: 2,
       sendBuffer: Buffer.from([addr & 0x7F, 0x00]),
       receiveBuffer: Buffer.alloc(2),
-	speedHz: 500000,
+	    speedHz: reg.TRANSFER_SPEED,
     }];
 
     state.radio.transferSync(message);
@@ -329,7 +329,7 @@ export function rfm69() {
       byteLength: 2,
       sendBuffer: Buffer.from([addr | 0x80, value]),
       receiveBuffer: Buffer.alloc(2),
-			speedHz: 500000,
+			speedHz: reg.TRANSFER_SPEED,
     }];
 
     state.radio.transferSync(message);

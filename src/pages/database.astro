@@ -266,8 +266,8 @@ import Button from "../components/Button.astro";
 		// Initial fetch
 		fetchDatabaseData();
 		
-		// Set up interval to fetch every second
-		const fetchInterval = setInterval(fetchDatabaseData, 1000);
+		// Set up interval to fetch every 500 milliseconds
+		const fetchInterval = setInterval(fetchDatabaseData, 500);
 
 		window.addEventListener('beforeunload', () => {
 			if (fetchInterval) { clearInterval(fetchInterval); }

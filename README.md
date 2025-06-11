@@ -1,47 +1,244 @@
-# Astro Starter Kit: Minimal
+# ESP32-RP3A0-LoRa-Server
+
+This repository contains a Long Range (LoRa) local server implementation using a Raspberry Pi Zero 2 W and ESP32 microcontrollers.
+
+The whole project consists of an Astro project which handles everything through the Sever-Side Rendering implementation. This helps to enable API endpoints and monitoring of the GPIO board.
+
+## Table of contents
+
+- [Hardware requirements](#hardware-requirements)
+  - [RPIZero 2 W wiring](#rpizero-2-w-wiring)
+  - [ESP32 wiring for sample script](#esp32-wiring-for-sample-script)
+- [Dependencies (with versions)](#dependencies-with-versions)
+    - [rfm69radio Modifications](#modifications-of-rfm69radio)
+        - [Modifications of `registers.js`](#modifications-of-registersjs)
+        - [Modifications of `config.js`](#modifications-of-configjs)
+        - [Modifications of `rfm69.js`](#modifications-of-rfm69js)
+- [Example setup](#example-setup)
+  - [1. Install MariaDB](#1-install-mariadb)
+  - [2. Create the database](#2-create-the-database)
+  - [3. Install Node.js and Git](#3-install-nodejs-and-git)
+  - [4. Clone the repository and install dependencies](#4-clone-the-repository-and-install-dependencies)
+  - [5. Configure credentials](#5-configure-credentials)
+  - [6. Start the server](#6-start-the-server)
+
+## Hardware requirements
+
+- Raspberry Pi Zero 2 W (recommended to use Raspberry Pi OS Lite with headless install)
+- ESP32 microcontroller as data monitoring endpoints
+
+You can review the script `/client_ESP32/RFM69HCW_Tx.cpp` for an example of how to set up the ESP32 microcontroller.
+
+### RPIZero 2 W wiring
+
+| RFM69HCW Pin | RPi Zero 2 W Pin         |
+|--------------|--------------------------|
+| 3v3          | 3v3                       |
+| GND          | GND
+| DIO0         | 18 (GPIO24)              |
+| MOSI         | 19 (GPIO10)              |
+| MISO         | 21 (GPIO09)              |
+| SCK (CLK)          | 23 (GPIO11)              |
+| NSS (CS)     | 24 (GPIO08 CS0)          |
+| RESET        | 29 (GPIO05)              |
+
+### ESP32 wiring for sample script
+
+| RFM69HCW Pin | ESP32 Pin |
+|--------------|-----------|
+| 3v3          | 3v3       |
+| GND          | GND       |
+| DIO0         | D2        |
+| MOSI         | D23       |
+| MISO         | D19       |
+| SCK (CLK)    | D18       |
+| NSS (CS)     | D5        |
+
+## Dependencies (with versions)
+
+- Node.js v22.13.0
+- [Astro v5.8.0](https://astro.build/)
+- [MariaDB v3.4.2](https://www.npmjs.com/package/mariadb)
+- [mysql2 v3.14.1](https://www.npmjs.com/package/mysql2)
+- [onoff v6.0.3](https://www.npmjs.com/package/onoff)
+- [plotly v3.0.1](https://www.npmjs.com/package/plotly)
+- [spi-device v3.1.2](https://www.npmjs.com/package/spi-device)
+
+Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used but it had to be modified, you can find the modified source files inside `/src/lib/rfm69radio`. As such, the modifications are:
+
+#### Modifications of `registers.js`
+
+**Lines 4 - 5:** Update function export and transfer speed
+```diff
+- module.exports = Object.freeze({
++ export const reg = Object.freeze({
+
+-       TRANSFER_SPEED: 40000,
++       TRANSFER_SPEED: 500000,
+    // the rest of the object body remains unchanged
+)};
+```
+
+**Lines 1061 - 1063:** Add default export
+```diff
++ export default {
++ 	 reg,
++ };
+```
+
+#### Modifications of `config.js`
+
+**Line 4:** Change to use **ES6 import**
+```diff
+- const reg = require('./registers');
+
++ import _reg from './registers.js';
++ const reg = _reg.reg;
+```
+
+**Line 10:** Update function export
+```diff
+- module.exports.getConfig = function(freqBand, networkID) {
++ export function getConfig(freqBand, networkID) {
+    // function body remains unchanged
+};
+```
+
+**Lines 68 - 71:** Add default export
+```diff
++export default {
++	getConfig,
++};
+```
+
+#### Modifications of `rfm69.js`
+
+**Lines 4 - 9:** Change to use **ES6 import**
+``` diff
+- const rfm69 = function() {
+
+-   const spi = require('spi-device');
+-   const Gpio = require('onoff').Gpio;
+-   const config = require('./config');
+-   const reg = require('./registers');
+
++ import spi from 'spi-device';
++ import {Gpio} from 'onoff';
++ import config from './config.js';
++ import _reg from './registers.js';
+
++ const reg = _reg.reg;
+
++ export function rfm69() {
+    // the rest of the function body remains unchanged
+};
+```
+
+## Example setup
+
+For the current implementation of using **ESP32** microcontrollers to monitor a temperature sensor **LM35** and a RGB color sensor module **TCS34725**
+
+You can use the sample code `/client_ESP32/RFM69HCW_Tx.cpp` to set up the ESP32 microcontroller.
+
+### 1. Install MariaDB
+
+First make sure to install MariaDB and set your **username** and **password**. **Please make sure to take note of the credentials!**
 
 ```sh
-npm create astro@latest -- --template minimal
+sudo apt install mariadb-server
+sudo mysql_secure_installation
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+### 2. Create the database
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Use your credentials to access MariaDB
 
-## 🚀 Project Structure
+```sha
+sudo mariadb -h localhost -u $USERNAME_HERE -p
+```
+Grant access to your user through password or make a new user for read access, in this example we opt for the first option
 
-Inside of your Astro project, you'll see the following folders and files:
+```sql
+ALTER USER $YOUR_USERNAME@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD($YOUR_PASSWORD);
+```
+Afterwards, create the database and table to log all incoming data. Feel free to change the database name and table name according to your needs
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+The example table is for logging the incoming data from the LM35 and the TCS34725
+
+```sql
+CREATE DATABASE $DATABASE_NAME;
+USE $DATABASE_NAME;
+CREATE TABLE $TABLE_NAME (
+  id int NOT NULL auto_increment,
+  id_dispositivo int NOT NULL,
+  fecha date NOT NULL,
+  hora time NOT NULL,
+  temperatura float(6,3) NOT NULL,
+  rojo int NOT NULL,
+  verde int NOT NULL,
+  azul int NOT NULL,
+  PRIMARY KEY (id)
+) AUTO_INCREMENT=1;
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### 3. Install Node.js and Git
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+The following example uses the recommended method for installing the latest Node.js version as of this writing. Make sure to consult any new version available
 
-Any static assets, like images, can be placed in the `public/` directory.
+```sh
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
+sudo apt-get install -y nodejs
+sudo apt-get install git
+```
 
-## 🧞 Commands
+### 4. Clone the repository and install dependencies
 
-All commands are run from the root of the project, from a terminal:
+Now you can clone the repository and install the required dependencies
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```sh
+git clone https://github.com/yourusername/ESP32-RP3A0-LoRa-Server.git
+cd ESP32-RP3A0-LoRa-Server
+npm install
+```
 
-## 👀 Want to learn more?
+### 5. Configure credentials
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Lastly, add the MariaDB credentials to enviroment variables and also inside the background monitoring script (it has to be done manually because enviroment variable wouldn't work)
+
+Your `.env` should look like:
+
+```env
+SQL_HOST=localhost
+SQL_USER=
+SQL_PASSWORD=
+DATABASE_NAME=
+TABLE_NAME=
+```
+
+Where you have to add your credentials and both the database and table names. If needed you can also change the hostname.
+
+Inside `/integrations/deviceMonitoring.js` modify line 7 to line 15:
+
+```javascript
+// ...existing code...
+const TABLE_NAME = ""; // <-- Add your table name here
+
+const dbConfig = {
+  host: "",      // <-- Add your SQL host here
+  user: "",      // <-- Add your SQL user here
+  password: "",  // <-- Add your SQL password here
+  database: "",  // <-- Add your database name here
+  port: 3306
+};
+// ...existing code...
+```
+
+### 6. Start the server
+
+Now you can start the server with:
+
+```sh
+npm run dev
+```
+
+This will launch the Astro server and begin monitoring device data in the background to receive every incoming packet.

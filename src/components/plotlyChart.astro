@@ -120,7 +120,7 @@ const uniqueId = chartId;
 				} catch (error) {
 					console.error('Error fetching data:', error);
 				}
-			}, 2000);
+			}, 510);
 
 			window[`getData_${uniqueId.replaceAll('-', '_')}`] = function() {
 				return typeData === 'temperature' ? {
