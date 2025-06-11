@@ -2,17 +2,15 @@ import fs from "fs";
 import mysql from "mysql2/promise";
 import Gpio from "onoff";
 
-
 import { eventBus } from "../src/lib/eventBus.js";
 
-
-const DATABASE_NAME = "";
 const TABLE_NAME = "";
 
 const dbConfig = {
-    host: "localhost",
-    password: "root",
-    database: DATABASE_NAME,
+    host: "",
+    user: "",
+    password: "",
+    database: "",
     port: 3306
 };
 

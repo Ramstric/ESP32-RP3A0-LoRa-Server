@@ -1,11 +1,11 @@
 import mysql from "mysql2/promise";
 
-import { DATABASE_NAME, TABLE_NAME } from "astro:env/client";
+import { SQL_HOST, SQL_USER, SQL_PASSWORD, DATABASE_NAME, TABLE_NAME } from "astro:env/client";
 
 const dbConfig = {
-    host: "localhost",
-    user: "root",
-    password: "root",
+    host: SQL_HOST,
+    user: SQL_USER,
+    password: SQL_PASSWORD,
     database: DATABASE_NAME,
     port: 3306
 };

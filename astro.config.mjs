@@ -13,6 +13,21 @@ export default defineConfig({
 
     env: {
       schema: {
+        SQL_HOST: envField.string({
+          context: "client",
+          access: "public",
+        }),
+
+        SQL_USER: envField.string({
+          context: "client",
+          access: "public",
+        }),
+
+        SQL_PASSWORD: envField.string({
+          context: "client",
+          access: "public",
+        }),
+
         DATABASE_NAME: envField.string({
           context: "client",
           access: "public",
