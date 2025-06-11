@@ -1,17 +1,18 @@
+import 'dotenv/config';
+
 import fs from "fs";
 import mysql from "mysql2/promise";
 import Gpio from "onoff";
 
 import { eventBus } from "../src/lib/eventBus.js";
 
-const TABLE_NAME = "";
 
 const dbConfig = {
-    host: "",
-    user: "",
-    password: "",
-    database: "",
-    port: 3306
+  host: process.env.SQL_HOST,
+  user: process.env.SQL_USER,
+  password: process.env.SQL_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  port: 3306
 };
 
 async function insertTestData(id_dispositivo, temperatura, rojo, verde, azul) {
@@ -25,7 +26,7 @@ async function insertTestData(id_dispositivo, temperatura, rojo, verde, azul) {
         const hora = now.toTimeString().split(' ')[0];
         
         const query = `
-        INSERT INTO ${TABLE_NAME} (id_dispositivo, fecha, hora, temperatura, rojo, verde, azul) 
+        INSERT INTO ${process.env.TABLE_NAME} (id_dispositivo, fecha, hora, temperatura, rojo, verde, azul) 
         VALUES (${id_dispositivo}, '${fecha}', '${hora}', ${temperatura}, ${rojo}, ${verde}, ${azul})
         `;
         

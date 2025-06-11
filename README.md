@@ -31,16 +31,16 @@ You can review the script `/client_ESP32/RFM69HCW_Tx.cpp` for an example of how 
 
 ### RPIZero 2 W wiring
 
-| RFM69HCW Pin | RPi Zero 2 W Pin         |
-|--------------|--------------------------|
-| 3v3          | 3v3                       |
-| GND          | GND
-| DIO0         | 18 (GPIO24)              |
-| MOSI         | 19 (GPIO10)              |
-| MISO         | 21 (GPIO09)              |
-| SCK (CLK)          | 23 (GPIO11)              |
-| NSS (CS)     | 24 (GPIO08 CS0)          |
-| RESET        | 29 (GPIO05)              |
+| RFM69HCW Pin | RPi Zero 2 W Pin   | Note |
+|--------------|--------------------|------|
+| 3v3          | 1 (3v3)            |      |
+| GND          | 9 (GND)            | Can use any GND pin |
+| DIO0         | 18 (GPIO24)        | Interrupt Pin |
+| MOSI         | 19 (GPIO10)        |
+| MISO         | 21 (GPIO09)        |
+| SCK (CLK)    | 23 (GPIO11)        |
+| NSS (CS)     | 24 (GPIO08 CS0)    |
+| RESET        | 29 (GPIO05)        | Reset Pin |
 
 ### ESP32 wiring for sample script
 
@@ -66,7 +66,16 @@ You can review the script `/client_ESP32/RFM69HCW_Tx.cpp` for an example of how 
 
 Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used, but it had to be modified; you can find the modified source files inside `/src/lib/rfm69radio`.
 
-Please, review the usage of **rfm69radio** in `/integrations/deviceMonitoring.js` **lines 92 to 100**. The Raspberry OS kernel addresses GPIO in a particular way (see [Use raspberry pi 4 GPIO with node js](https://stackoverflow.com/questions/78173749/use-raspberry-pi-4-gpio-with-node-js/78184108#78184108)) you may also need to change the arguments `address` and `networkID` or add any other required option, please refer to the original repository for further details.
+
+> **IMPORTANT: GPIO Pin Configuration**
+>
+> The `onoff` library (used by `rfm69radio`) requires GPIO pins to be addressed by their **kernel line number**, not their BCM or board number (see [Use raspberry pi 4 GPIO with node js](https://stackoverflow.com/questions/78173749/use-raspberry-pi-4-gpio-with-node-js/78184108#78184108)).
+>
+> In this project's configuration:
+> - `interruptPin: 536` corresponds to **GPIO24** (Board Pin 18).
+> - `resetPin: 517` corresponds to **GPIO05** (Board Pin 29).
+>
+> If you change the wiring, you **must** find the new kernel line numbers.
 
 ```javascript
 RFM69.initialize({
@@ -218,7 +227,7 @@ npm install
 
 ### 5. Configure credentials
 
-Lastly, add the MariaDB credentials to environment variables and also inside the background monitoring script (it has to be done manually because environment variables wouldn't work)
+Lastly, add the MariaDB credentials to environment variables.
 
 Your `.env` should look like:
 
@@ -231,22 +240,6 @@ TABLE_NAME=
 ```
 
 Add your credentials and both the database and table names. If needed, you can also change the hostname.
-
-Inside `/integrations/deviceMonitoring.js` modify line 7 to line 15:
-
-```javascript
-// ...existing code...
-const TABLE_NAME = ""; // <-- Add your table name here
-
-const dbConfig = {
-  host: "",      // <-- Add your SQL host here
-  user: "",      // <-- Add your SQL user here
-  password: "",  // <-- Add your SQL password here
-  database: "",  // <-- Add your database name here
-  port: 3306
-};
-// ...existing code...
-```
 
 ### 6. Start the server
 

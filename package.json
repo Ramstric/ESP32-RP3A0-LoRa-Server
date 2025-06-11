@@ -11,6 +11,7 @@
   "dependencies": {
     "@astrojs/node": "^9.2.2",
     "astro": "^5.8.0",
+    "dotenv": "^16.5.0",
     "mariadb": "^3.4.2",
     "mysql2": "^3.14.1",
     "onoff": "^6.0.3",
