@@ -64,7 +64,22 @@ You can review the script `/client_ESP32/RFM69HCW_Tx.cpp` for an example of how 
 - [plotly v3.0.1](https://www.npmjs.com/package/plotly)
 - [spi-device v3.1.2](https://www.npmjs.com/package/spi-device)
 
-Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used, but it had to be modified; you can find the modified source files inside `/src/lib/rfm69radio`. As such, the modifications are:
+Package [rfm69radio](https://github.com/AndyFlem/rfm69radio) is used, but it had to be modified; you can find the modified source files inside `/src/lib/rfm69radio`.
+
+Please, review the usage of **rfm69radio** in `/integrations/deviceMonitoring.js` **lines 92 to 100**. The Raspberry OS kernel addresses GPIO in a particular way (see [Use raspberry pi 4 GPIO with node js](https://stackoverflow.com/questions/78173749/use-raspberry-pi-4-gpio-with-node-js/78184108#78184108)) you may also need to change the arguments `address` and `networkID` or add any other required option, please refer to the original repository for further details.
+
+```javascript
+RFM69.initialize({
+  interruptPin: 536, // GPIO24
+  resetPin: 517, // GPIO05
+  address: 1,
+  networkID: 100
+}).then(() => {
+  RFM69.registerPacketReceivedCallback(packetLog);
+  return true;
+});
+```
+
 
 #### Modifications of `registers.js`
 
