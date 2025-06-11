@@ -33,12 +33,21 @@ const colorChartId = `color-${uniqueDeviceId}`;
         </div>
         <div class="plots">
             <div class="temperature">
-                <h3>Sensor de temperatura</h3>
                 <div class="plot">
-                    <div class="recent-data">
-                        <img src="/img/temperature.png" alt="Temperature Icon" />
-                        <p>Temperatura actual:</p>
-                        <p id="current-temperature">-- °C</p>
+                    <div class="plot-header">
+                        <div class="recent-data">
+                            <div style="flex-direction: row;">
+                                <img src="/img/temperature.png" alt="Temperature Icon" />
+                                <h3 id="current-temperature"></h3>
+                            </div>
+                            <p>Temperatura actual</p>
+                        </div>
+                        <div class="recent-data">
+                            <div style="flex-direction: row;">
+                                <h3>LM35</h3>
+                            </div>
+                            <p>Sensor de temperatura</p>
+                        </div>
                     </div>
                     <PlotlyChart
                         chartId={temperatureChartId}
@@ -49,12 +58,21 @@ const colorChartId = `color-${uniqueDeviceId}`;
                 </div>
             </div>
             <div class="color">
-                <h3>Módulo de reconocimiento de color</h3>
                 <div class="plot">
-                    <div class="recent-data">
-                        <img src="/img/color-palette.png" alt="Color Palette Icon" />
-                        <p>Color:</p>
-                        <p id="current-color">--</p>
+                    <div class="plot-header">
+                        <div class="recent-data">
+                            <div style="flex-direction: row;">
+                                <img src="/img/color-palette.png" alt="Color Palette Icon" />
+                                <h3 id="current-color"></h3>
+                            </div>
+                            <p>Color actual</p>
+                        </div>
+                        <div class="recent-data">
+                            <div style="flex-direction: row;">
+                                <h3>TCS34275</h3>
+                            </div>
+                            <p>Módulo de reconocimiento de color</p>
+                        </div>
                     </div>
                     <PlotlyChart
                         chartId={colorChartId}
@@ -196,21 +214,36 @@ const colorChartId = `color-${uniqueDeviceId}`;
         color: var(--white);
         background-color: #1d1d1d;
         filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
-        padding-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
     }
 
-    .recent-data {
+    .plot-header {
         flex-direction: row;
-        gap: 10px;
+        justify-content: space-between;
+    }
+    
+    .recent-data {
+        :first-child {gap: 10px;}
+
+        > :nth-child(2) {
+            font-size: 12px;
+            color: var(--light-gray);
+        }
+
+        img {
+            width: 35px;
+            height: 35px;
+        }
+
+        h3 {
+            padding: 2.5px;
+            border-radius: 5px;
+        }
     }
 
     .recent-data * {
         width: fit-content;
-    }
-
-    .recent-data img {
-        width: 30px;
-        height: 30px;
     }
 
     /* Animations */
@@ -264,7 +297,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
 
         .plot {
             width: 100%;
-            height: 300px;
+            height: 375px;
         }
 
         .color, .temperature {
@@ -277,6 +310,8 @@ const colorChartId = `color-${uniqueDeviceId}`;
 </style>
 
 <script define:vars={{ temperatureChartId, colorChartId, uniqueDeviceId }}>
+    const temperatureColorScale = ["#37537C","#26436F","#254f77","#2b5b79","#27678a","#287593","#438190","#648c89","#879a84","#aaa97d","#c2ab77","#c19d61","#c38a53","#be704c","#af4d4c","#9f294c","#87203e","#6e1531","#560c25","#3d0216"];
+
     const currentTemperatureElement = document.getElementById('current-temperature');
     const currentColorElement = document.getElementById('current-color');
     
@@ -304,6 +339,9 @@ const colorChartId = `color-${uniqueDeviceId}`;
                     if (window[`getData_${temperatureChartId.replaceAll('-', '_')}`]) {
                         const data = window[`getData_${temperatureChartId.replaceAll('-', '_')}`]();
                         currentTemperatureElement.textContent = `${data.y || 0} °C`;
+
+                        const temperatureColor = temperatureColorScale[Math.floor(Math.abs(data.y/2.5 - 1))]
+                        currentTemperatureElement.style.backgroundColor = temperatureColor;
                     }
                 } catch (error) {
                     console.error('Error updating temperature:', error);
@@ -314,8 +352,10 @@ const colorChartId = `color-${uniqueDeviceId}`;
                 try {
                     if (window[`getData_${colorChartId.replaceAll('-', '_')}`]) {
                         const data = window[`getData_${colorChartId.replaceAll('-', '_')}`]();
-                        // You'll need to decide how to display RGB data
-                        currentColorElement.textContent = `RGB: ${data.y.r || 0} ${data.y.g || 0} ${data.y.b || 0}`;
+                        // RGB to hex conversion
+                        const hexColor = `#${data.y.r.toString(16).padStart(2, '0')}${data.y.g.toString(16).padStart(2, '0')}${data.y.b.toString(16).padStart(2, '0')}`;
+                        currentColorElement.textContent = `${hexColor.toUpperCase()}`;
+                        currentColorElement.style.backgroundColor = hexColor;
                     }
                 } catch (error) {
                     console.error('Error updating color:', error);

@@ -10,7 +10,6 @@ import Button from "../components/Button.astro";
         <p>ordenar por:</p>
         <div class="options">
             <Button text="fecha" id="sort-date" active />
-            <Button text="hora" id="sort-time" />
             <Button text="temperatura" id="sort-temperature" />
         </div>
     </div>
@@ -22,6 +21,11 @@ import Button from "../components/Button.astro";
             <Button text="2" id="filter-node-2" active />
         </div>
     </div>
+
+	<div class="temperature-scale">
+		<p>Escala de temperatura</p>
+		<div id="temperature-samples"></div>
+	</div>
 
     <div class="database">
         <table class="data-table">
@@ -69,6 +73,16 @@ import Button from "../components/Button.astro";
 
         gap: 125px;
     }
+
+	.temperature-scale {
+		flex-direction: row;
+		margin-top: 10px;
+		gap: 20px;
+
+		* {width: fit-content;}
+	}
+
+	#temperature-samples {flex-direction: row;}
 
     .database {padding: 10px 100px;}
 
@@ -125,11 +139,25 @@ import Button from "../components/Button.astro";
 		.options {
         gap: 20px;
     	}
+
+		.temperature-scale{gap: 10px;}
 	}
 </style>
 
 <script>
 	const temperatureColorScale = ["#37537C","#26436F","#254f77","#2b5b79","#27678a","#287593","#438190","#648c89","#879a84","#aaa97d","#c2ab77","#c19d61","#c38a53","#be704c","#af4d4c","#9f294c","#87203e","#6e1531","#560c25","#3d0216"];
+	const temperatureSamples = document.getElementById('temperature-samples');
+
+	if (temperatureSamples) {
+		temperatureColorScale.forEach(color => {
+			const colorDiv = document.createElement('div');
+			colorDiv.style.backgroundColor = color;
+			colorDiv.style.width = window.matchMedia('(max-width: 830px)').matches ? '7.5px' : '35px';
+			colorDiv.style.height = '20px';
+			colorDiv.style.display = 'inline-block';
+			temperatureSamples.appendChild(colorDiv);
+		});
+	}
 
 	let currentSort = 'fecha';
 	let currentOrder = 'DESC';
@@ -212,11 +240,6 @@ import Button from "../components/Button.astro";
 			fetchDatabaseData();
 		});
 		
-		document.getElementById('sort-time')?.addEventListener('click', () => {
-			currentSort = 'hora';
-			updateActiveButton('sort-time');
-			fetchDatabaseData();
-		});
 		
 		document.getElementById('sort-temperature')?.addEventListener('click', () => {
 			currentSort = 'temperatura';

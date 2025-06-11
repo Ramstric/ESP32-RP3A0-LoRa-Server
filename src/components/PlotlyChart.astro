@@ -52,7 +52,7 @@ const uniqueId = chartId;
 				paper_bgcolor: 'rgba(0,0,0,0)',
 				showlegend: false,
 				font: { color: '#ffece7', family: 'Manrope' },
-				margin: { l: 65, r: 35, t: title ? 50 : 20, b: 65, pad: 10 },
+				margin: { l: 65, r: 35, t: 20, b: 65, pad: 10 },
 			};
 
 			const config = {displayModeBar: false};
@@ -89,7 +89,7 @@ const uniqueId = chartId;
 
 			setInterval(async () => {
 				try {
-					const paramsQuery = new URLSearchParams({sort: 'hora', order: 'DESC', nodes: uniqueId.split('-')[1], limit: '7'});
+					const paramsQuery = new URLSearchParams({sort: 'fecha', order: 'DESC', nodes: uniqueId.split('-')[1], limit: '7'});
 					const response = await fetch(`/api/retrieveDatabase?${paramsQuery}`);
 
 					if (!response.ok) throw new Error('Database response for PlotlyChart was not ok');

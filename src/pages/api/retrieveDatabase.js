@@ -48,7 +48,7 @@ export async function GET({ url }) {
         const validSortOrders = ["ASC", "DESC"];
 
         if (validSortColumns.includes(sortBy) && validSortOrders.includes(sortOrder.toUpperCase())) {
-            query += ` ORDER BY ${sortBy} ${sortOrder.toUpperCase()}`;
+            query += ` ORDER BY ${sortBy} ${sortOrder.toUpperCase()}, hora DESC`;
         }
 
         // Add limit

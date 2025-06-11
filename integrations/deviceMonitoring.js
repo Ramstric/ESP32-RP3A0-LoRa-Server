@@ -1,8 +1,10 @@
 import fs from "fs";
 import mysql from "mysql2/promise";
+import Gpio from "onoff";
+
 
 import { eventBus } from "../src/lib/eventBus.js";
-import { rfm69 } from "../src/lib/rfm69radio/rfm69.js";
+
 
 const DATABASE_NAME = "";
 const TABLE_NAME = "";
@@ -42,9 +44,22 @@ async function insertTestData(id_dispositivo, temperatura, rojo, verde, azul) {
     }
 }
 
-const RFM69 = new rfm69();
-
 const currentDevices = new Set();
+
+let RFM69;
+
+if (Gpio.accessible) {
+    //import { rfm69 } from "../src/lib/rfm69radio/rfm69.js";
+    import("../src/lib/rfm69radio/rfm69.js").then(module => {
+        const rfm69 = module.rfm69;
+        RFM69 = new rfm69();
+    });
+    
+} else {
+    console.warn("RFM69 not available, using mock implementation.");
+    currentDevices.add(1);
+}
+
 
 export default function backgroundScript() {
     fs.writeFileSync("currentDevices.json", JSON.stringify(Array.from(currentDevices)), "utf-8");
@@ -52,39 +67,43 @@ export default function backgroundScript() {
     return {
         name: "background-script",
         hooks: {"astro:server:start": async () => {
-            function packetLog(packet) {
-                const [temperatureValue, ...rgbValues] = packet.payload.split(/[/,]/);
-                
-                const esp32Data = {
-                    id: packet.senderAddress,
-                    temperature: parseInt(temperatureValue),
-                    r: parseInt(rgbValues[0]),
-                    g: parseInt(rgbValues[1]),
-                    b: parseInt(rgbValues[2]),
-                };
+            
+            if (RFM69) {
+                function packetLog(packet) {
+                    const [temperatureValue, ...rgbValues] = packet.payload.split(/[/,]/);
+                    
+                    const esp32Data = {
+                        id: packet.senderAddress,
+                        temperature: parseInt(temperatureValue),
+                        r: parseInt(rgbValues[0]),
+                        g: parseInt(rgbValues[1]),
+                        b: parseInt(rgbValues[2]),
+                    };
 
-                if (!currentDevices.has(esp32Data.id)) {
-                    currentDevices.add(esp32Data.id);
-                    eventBus.emit("detectedDevices", {
-                        amount: currentDevices.size,
-                        devices: Array.from(currentDevices).map((id) => ({id,}))
-                    });
-                    fs.writeFileSync("currentDevices.json", JSON.stringify(Array.from(currentDevices)), "utf-8");
+                    if (!currentDevices.has(esp32Data.id)) {
+                        currentDevices.add(esp32Data.id);
+                        eventBus.emit("detectedDevices", {
+                            amount: currentDevices.size,
+                            devices: Array.from(currentDevices).map((id) => ({id,}))
+                        });
+                        fs.writeFileSync("currentDevices.json", JSON.stringify(Array.from(currentDevices)), "utf-8");
+                    }
+
+                    insertTestData(esp32Data.id, esp32Data.temperature, esp32Data.r, esp32Data.g, esp32Data.b);
+                        
                 }
 
-                insertTestData(esp32Data.id, esp32Data.temperature, esp32Data.r, esp32Data.g, esp32Data.b);
-                    
+                RFM69.initialize({
+                    interruptPin: 536,
+                    resetPin: 517,
+                    address: 1,
+                    networkID: 100
+                }).then(() => {
+                    RFM69.registerPacketReceivedCallback(packetLog);
+                    return true;
+                });
             }
-
-            RFM69.initialize({
-                interruptPin: 536,
-                resetPin: 517,
-                address: 1,
-                networkID: 100
-            }).then(() => {
-                RFM69.registerPacketReceivedCallback(packetLog);
-                return true;
-            });
+            
         }
     }
 };}
