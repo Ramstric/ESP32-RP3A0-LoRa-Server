@@ -220,7 +220,7 @@ sudo apt-get install git
 Now you can clone the repository and install the required dependencies
 
 ```sh
-git clone https://github.com/yourusername/ESP32-RP3A0-LoRa-Server.git
+git clone https://github.com/Ramstric/ESP32-RP3A0-LoRa-Server.git
 cd ESP32-RP3A0-LoRa-Server
 npm install
 ```
