@@ -145,6 +145,8 @@ import Button from "../components/Button.astro";
 </style>
 
 <script>
+	import data from '../data.json' with { type: 'json' };
+
 	const temperatureColorScale = ["#37537C","#26436F","#254f77","#2b5b79","#27678a","#287593","#438190","#648c89","#879a84","#aaa97d","#c2ab77","#c19d61","#c38a53","#be704c","#af4d4c","#9f294c","#87203e","#6e1531","#560c25","#3d0216"];
 	const temperatureSamples = document.getElementById('temperature-samples');
 
@@ -163,7 +165,7 @@ import Button from "../components/Button.astro";
 	let currentOrder = 'DESC';
 	let currentNodes = '1,2';
 
-	function updateTable(data: [{id: number, fecha: string, hora: string, temperatura: number, r: number, g: number, b: number}]) {
+	function updateTable(data: {id: number, fecha: string, hora: string, temperatura: number, r: number, g: number, b: number}[]) {
 		const tbody = document.querySelector('.data-table tbody');
 		if (!tbody) return;
 		
@@ -191,20 +193,26 @@ import Button from "../components/Button.astro";
 	}
 
 	async function fetchDatabaseData() {
-		try {
-			const params = new URLSearchParams({sort: currentSort, order: currentOrder, nodes: currentNodes, limit: '100'});
-			
-			const response = await fetch(`/api/retrieveDatabase?${params}`);
-			const result = await response.json();
+		
+		const sampleData = data as [{id: number, fecha: string, hora: string, temperatura: number, r: number, g: number, b: number}];
+		let filteredData = sampleData.filter(row => {
+			const nodes = currentNodes.split(',').map(n => parseInt(n)).filter((n) => !isNaN(n));
+			return nodes.includes(row.id);
+		});
 
-			if (result.success) {
-				updateTable(result.data);
-			} else {
-				console.error('API Error:', result.error);
-			}
-		} catch (error) {
-			console.error('Fetch error:', error);
+		if (currentSort === 'fecha') {
+			filteredData.sort((a, b) => {
+				const dateA = new Date(`${a.fecha} ${a.hora}`);
+				const dateB = new Date(`${b.fecha} ${b.hora}`);
+				return currentOrder === 'DESC' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+			});
+		} else if (currentSort === 'temperatura') {
+			filteredData.sort((a, b) => {
+				return currentOrder === 'DESC' ? b.temperatura - a.temperatura : a.temperatura - b.temperatura;
+			});
 		}
+
+		updateTable(filteredData);
 	}
 
 	function updateActiveButton(activeId: string) {

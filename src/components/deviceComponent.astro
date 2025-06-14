@@ -1,10 +1,6 @@
 ---
 import PlotlyChart from './plotlyChart.astro';
 
-export interface Props {
-    deviceId: number;
-    deviceType?: string;
-}
 const { deviceId, deviceType = "ESP32" } = Astro.props;
 const uniqueDeviceId = `device-${deviceId}`;
 const temperatureChartId = `temperature-${uniqueDeviceId}`;
@@ -15,7 +11,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
     <div class="connection-overlay" id={`overlay-${uniqueDeviceId}`}>
         <div class="connection-content">
             <div class="connection-icon">
-                <img src="/img/motherboard.png" alt="Device" />
+                <img src="/ESP32-RP3A0-LoRa-Server/img/lora/motherboard.png" alt="Device" />
                 <div class="pulse-ring"></div>
             </div>
             <div class="connection-text">
@@ -28,7 +24,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
 
     <div class="device-main-content" id={`content-${uniqueDeviceId}`}>
         <div class="identifier">
-            <img src="/img/motherboard.png" id="device-logo" alt="Motherboard" />
+            <img src="/ESP32-RP3A0-LoRa-Server/img/lora/motherboard.png" id="device-logo" alt="Motherboard" />
             <h2>Dispositivo <b>{deviceType}</b> - Nodo <b>{deviceId}</b></h2>
         </div>
         <div class="plots">
@@ -37,7 +33,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
                     <div class="plot-header">
                         <div class="recent-data">
                             <div style="flex-direction: row;">
-                                <img src="/img/temperature.png" alt="Temperature Icon" />
+                                <img src="/ESP32-RP3A0-LoRa-Server/img/lora/temperature.png" alt="Temperature Icon" />
                                 <h3 id="current-temperature"></h3>
                             </div>
                             <p>Temperatura actual</p>
@@ -62,7 +58,7 @@ const colorChartId = `color-${uniqueDeviceId}`;
                     <div class="plot-header">
                         <div class="recent-data">
                             <div style="flex-direction: row;">
-                                <img src="/img/color-palette.png" alt="Color Palette Icon" />
+                                <img src="/ESP32-RP3A0-LoRa-Server/img/lora/color-palette.png" alt="Color Palette Icon" />
                                 <h3 id="current-color"></h3>
                             </div>
                             <p>Color actual</p>

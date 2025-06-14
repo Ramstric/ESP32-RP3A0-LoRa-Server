@@ -3,19 +3,10 @@ import "../styles/global.css";
 
 import Layout from "../layouts/Layout.astro";
 import DeviceComponent from "../components/deviceComponent.astro";
-
-const currDevicesFetch = await fetch(`${Astro.url.origin}/api/currentDevices`, {
-    headers: {"Content-Type": "application/json"},
-});
-
-const currDevicesData = await currDevicesFetch.json();
-const currDevices = currDevicesData.devices;
 ---
 
 <Layout id="dashboard">
-    {   
-        currDevices.map((id: number) => ( <DeviceComponent deviceId={id}/> ))
-    }
+    <DeviceComponent deviceId=1 deviceName="Device 1" deviceLogo="/images/device1.png" />
 </Layout>
 
 <style>
@@ -82,15 +73,3 @@ const currDevices = currDevicesData.devices;
     }
 </style>
 
-<script>
-    const sourceSSE = new EventSource("/api/deviceMonitoringEvent");
-
-    sourceSSE.onmessage = function(event) {
-      const notificationElement = document.getElementById("refresh-notification") as HTMLDivElement;
-      notificationElement.style.display = "flex";
-    };
-
-    window.addEventListener('beforeunload', () => {
-      sourceSSE.close();
-    });
-</script>
