@@ -5,19 +5,19 @@
 #include <Adafruit_TCS34725.h>
 
 // RFM69 Module Configuration
-#define NETWORK_ID 200        // Network ID, must be the same for all nodes and server
-#define NODE_ID 3             // Device ID, must be unique for each node
-#define TO_NODE_ID 2          // Node ID to send data, in this case the server ID
-#define FREQUENCY RF69_915MHZ // Module working frequency
-#define ENCRYPT_KEY "TOP"     // Encryption key
-#define IS_RFM69HCW true      // Is RFM69HCW module
-#define SPI_CS 5              // NSS or Cable Select to GPIO 5
-#define IRQ_PIN 2             // DIO0 to GPIO 2
-#define IRQ_NUM 2             // Same as DIO0
-#define USE_ACK true          // Request ACK response
+#define NETWORK_ID  100                 // Network ID, must be the same for all nodes and server
+#define NODE_ID     2                   // Device ID, must be unique for each node
+#define TO_NODE_ID  1                   // Node ID to send data, in this case the server ID
+#define FREQUENCY   RF69_915MHZ         // Module working frequency
+#define ENCRYPT_KEY "TOP"               // Encryption key
+#define IS_RFM69HCW true                // Is RFM69HCW module
+#define SPI_CS      5                   // NSS or Cable Select to GPIO 5
+#define IRQ_PIN     2                   // DIO0 to GPIO 2
+#define IRQ_NUM     2                   // Same as DIO0
+#define USE_ACK     true                // Request ACK response
 
-#define PIN_LM35 32        // LM35 temperature sensor
-#define ADC_VREF_mV 3300.0 // ADC reference voltage
+#define PIN_LM35 32                     // LM35 temperature sensor
+#define ADC_VREF_mV    5000.0           // ADC reference voltage
 #define ADC_RESOLUTION 4096.0
 
 unsigned long t_Evento = millis();
@@ -74,7 +74,7 @@ void loop()
 
     sensorLM35 = analogRead(PIN_LM35);
     milliVolt = sensorLM35 * (ADC_VREF_mV / ADC_RESOLUTION);
-    tempC = milliVolt / 10;
+    tempC = - 115.41 + milliVolt / 13.409;         // Convert the voltage to the temperature in °C
 
     sendData(tempC, int(r), int(g), int(b));
 }
